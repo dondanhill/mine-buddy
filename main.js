@@ -5,34 +5,18 @@ window.onload = function () {
         height = canvas.height = window.innerHeight
 
     canvas.addEventListener('mousedown', function (event) {
-        console.log(event.button, event.buttons);
         if (event.button === 0) {
             grid.clicked(event.clientX, event.clientY);
         } else {
-//            grid.rightClicked(event.clientX, event.clientY);
-            event.preventDefault();
-            event.stopPropagation();
-            return false;
+            grid.rightClicked(event.clientX, event.clientY);
         }
     });
-    // canvas.addEventListener("mouseup", function (event) {
-    //     console.log(event.button, event.buttons);
-    //     if (event.button === 0) {
-    //         grid.clicked(event.clientX, event.clientY);
-    //     } else {
-    //         grid.rightClicked(event.clientX, event.clientY);
-    //         event.preventDefault();
-    //     }
-    // });    
-
-    // context.rect(100, 100,width - 200, height - 200);
-    // for (let i = 0; i < 100; i += 1) {
-    //     context.beginPath();
-    //     context.moveTo(Math.random() * width, Math.random() * height);
-    //     context.lineTo(Math.random() * width, Math.random() * height);
-    //     context.stroke();
-    // }
-    var grid = new Grid(20, 16, 30, context);
+    canvas.addEventListener('contextmenu', function(event) {
+        event.preventDefault();
+        return false;
+    })
+    // begin
+    var grid = new Grid(9, 9, 30, context);
     grid.draw();
 };
 
@@ -107,6 +91,7 @@ function Box(x, y, size, context) {
     this.bombs = 0;
     this.clicked = false;
     this.highlighted = false;
+    this.flagged = false;
 
     this.draw = function() {
         context.beginPath();
@@ -117,18 +102,24 @@ function Box(x, y, size, context) {
             } else {
                 context.fillStyle = "#FFFFFF";
             }
-            context.font = "16px sans";
-            context.textAlign = "left";
+            context.font = '18px "Droid Sans Mono"';
+            context.textAlign = 'left';
             context.fill();
             if (!this.hasBomb && this.bombs) {
-                context.strokeText(this.bombs, this.x * this.size + this.size / 2.5, this.y * this.size + this.size / 1.5);
+                context.fillStyle = 'rgb(' + Math.floor(255-42.5*this.bombs) + ',0,0)';
+                context.fillText(this.bombs, this.x * this.size + this.size / 3, this.y * this.size + this.size / 1.4);
+                // context.strokeText(this.bombs, this.x * this.size + this.size / 2.5, this.y * this.size + this.size / 1.5);
             }
         } else {
             context.strokeStyle = "#444444";
             if(this.highlighted) {
-                context.fillStyle = "#BBBBFF";
-            } else {
-                context.fillStyle = "#7777FF";
+                context.fillStyle = "#DDDDFF";
+            } 
+            else if(this.flagged) {
+                context.fillStyle = "#55FF55";
+            }
+            else {
+                context.fillStyle = "#5555FF";
             }
             context.fill();
         }
@@ -137,26 +128,40 @@ function Box(x, y, size, context) {
 
     this.setClicked = function() {
         if (!this.clicked) {
-            this.clicked = true;
-            if (!this.bombs) {
-                console.log(this.neighbours.length)
-                this.neighbours.forEach(function(box) {
-                    // console.log(box);
-                    setTimeout(box.setClicked(), 100);
-                });
+            if(!this.flagged) {
+                this.clicked = true;
+                if (!this.bombs) {
+                    console.log(this.neighbours.length)
+                    this.neighbours.forEach(function(neighbour) {
+                        neighbour.setClicked();
+                    });
+                }
+                this.draw();
             }
-            this.draw();
+        } else {
+            this.clearNeighbours();
         }
     }
 
     this.rightClicked = function() {
         if (this.clicked) {
-            this.neighbours.forEach(function(box) {
-                if(!box.clicked) {
-                    box.highlighted = true;
-                    box.draw();
+            this.clearNeighbours();
+        } else {
+            this.flagged = !this.flagged;
+            this.draw();
+        }
+    }
+
+    this.clearNeighbours = function() {
+        let flags = this.neighbours.filter(function(neighbour) {
+            return neighbour.flagged;
+        });
+        if (flags.length && flags.length === this.bombs) {
+            this.neighbours.forEach(function(neighbour) {
+                if(!neighbour.clicked && !neighbour.flagged) {
+                    neighbour.setClicked();
                 }
-            })
+            });
         }
     }
 };
