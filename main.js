@@ -1,3 +1,7 @@
+// TODO guaranteed first click empty
+// TODO user parameter entries
+// TODO styling 
+
 var startTime;
 var timeOutId;
 var started = false;
@@ -121,9 +125,7 @@ function Grid(w, h, size, context) {
                 bomb.setClicked();
             })
         }
-        console.log('bombs', this.bombs.length, ', flags:', flags);
         if (this.boxes.length === uncovered + this.bombs.length) {
-            console.log('looks like you have won! :)');
             this.finished = true;
         } 
     }
