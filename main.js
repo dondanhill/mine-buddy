@@ -16,12 +16,15 @@ window.onload = function () {
         return false;
     })
     // begin
-    var grid = new Grid(9, 9, 30, context);
+    var grid = new Grid(12, 8, 30, context);
     grid.draw();
+    console.log('Grid:', grid.w, grid.h, grid.h * grid.w);
+    console.log('number of bombs: ' + grid.bombs.length);
 };
 
 function Grid(w, h, size, context) {
     this.boxes = [];
+    this.bombs = [];
     this.w = w;
     this.h = h;
     this.size = size;
@@ -31,6 +34,7 @@ function Grid(w, h, size, context) {
             let box = new Box(i, j, size, context);
             if (Math.random() * 17 > 14) {
                 box.hasBomb = true;
+                this.bombs.push(box);
             }
             this.boxes.push(box);
         };
@@ -62,6 +66,7 @@ function Grid(w, h, size, context) {
     };
 
     this.draw = function() {
+        this.flags = 0;
         this.boxes.forEach(function(box) {
             box.draw();
         });
@@ -69,9 +74,32 @@ function Grid(w, h, size, context) {
 
     this.clicked = function(x, y) {
         this.getBox(x, y).setClicked();
+        this.update();
     }
     this.rightClicked = function(x, y) {
-        this.getBox(x, y).rightClicked();
+        let box = this.getBox(x, y);
+        box.rightClicked();
+        this.update();
+    }
+
+    this.update = function() {
+        let uncovered = 0;
+        let flags = 0;
+        let bombs = 0;
+        this.boxes.forEach(function(box) {
+            uncovered += (box.clicked) ? 1 : 0;
+            flags += (box.flagged) ? 1 : 0;
+            bombs += (box.hasBomb && box.clicked);
+        });
+        if (bombs) {
+            this.bombs.forEach(function(bomb) {
+                bomb.setClicked();
+            })
+        }
+        console.log('bombs', this.bombs.length, ', flags:', flags);
+        if (this.boxes.length === uncovered + this.bombs.length) {
+            console.log('looks like you have won! :)');
+        } 
     }
 
     this.getBox = function(x, y) {
@@ -108,7 +136,7 @@ function Box(x, y, size, context) {
             if (!this.hasBomb && this.bombs) {
                 context.fillStyle = 'rgb(' + Math.floor(255-42.5*this.bombs) + ',0,0)';
                 context.fillText(this.bombs, this.x * this.size + this.size / 3, this.y * this.size + this.size / 1.4);
-                // context.strokeText(this.bombs, this.x * this.size + this.size / 2.5, this.y * this.size + this.size / 1.5);
+                context.strokeText(this.bombs, this.x * this.size + this.size / 3, this.y * this.size + this.size / 1.4);
             }
         } else {
             context.strokeStyle = "#444444";
@@ -131,7 +159,6 @@ function Box(x, y, size, context) {
             if(!this.flagged) {
                 this.clicked = true;
                 if (!this.bombs) {
-                    console.log(this.neighbours.length)
                     this.neighbours.forEach(function(neighbour) {
                         neighbour.setClicked();
                     });
