@@ -5,9 +5,11 @@
 var startTime;
 var timeOutId;
 var started = false;
+var grid;
 
 window.onload = function () {
     var canvas = document.getElementById('canvas'),
+        newGame = document.getElementById('new-game');
         context = canvas.getContext('2d'),
         width = 0,
         height = 0;
@@ -40,12 +42,23 @@ window.onload = function () {
     canvas.addEventListener('contextmenu', function(event) {
         event.preventDefault();
         return false;
+    });
+
+    newGame.addEventListener('click', function() {
+        event.preventDefault();
+        started = false;
+        document.getElementById('time').innerHTML = 0;
+        start();
     })
+
+    start();
     // begin
-    var grid = new Grid(21, 9, 30, context);
-    width = canvas.width = grid.w * grid.size;
-    height = canvas.height = grid.h * grid.size;
-    grid.draw();
+    function start() {
+        grid = new Grid(9, 9, 35, context);
+        width = canvas.width = grid.w * grid.size;
+        height = canvas.height = grid.h * grid.size;
+        grid.draw();
+    }
 };
 
 function Grid(w, h, size, context) {
@@ -59,7 +72,7 @@ function Grid(w, h, size, context) {
     for (let j = 0; j < h; j += 1) {
         for (let i = 0; i < w; i += 1) {
             let box = new Box(i, j, size, context);
-            if (Math.random() * 17 > 14) {
+            if (Math.random() * 100 > 87) {
                 box.hasBomb = true;
                 this.bombs.push(box);
             }
@@ -72,14 +85,14 @@ function Grid(w, h, size, context) {
         let box = this.boxes[i];
         if (!box.hasBomb) {
             let neighbours = [
-                i - 1,
-                i + 1,
-                i - w - 1,
-                i - w,
-                i - w + 1,
-                i + w - 1,
-                i + w,
-                i + w + 1
+                i - 1,        // left
+                i + 1,        // right 
+                i - w - 1,    // above left
+                i - w,        // above
+                i - w + 1,    // above right
+                i + w - 1,    // below left
+                i + w,        // below
+                i + w + 1     // below right
             ];
             neighbours.forEach(function (x) {
                 if (x >= 0 && x < w * h && Math.abs(box.x % w - x % w) <= 1) {
@@ -138,7 +151,7 @@ function Grid(w, h, size, context) {
 };
 
 function Box(x, y, size, context) {
-    var context = context;
+    // var context = context;
     this.neighbours = [];
     this.x = x;
     this.y = y;
@@ -164,7 +177,7 @@ function Box(x, y, size, context) {
             if (!this.hasBomb && this.bombs) {
                 context.fillStyle = 'rgb(' + Math.floor(255-42.5*this.bombs) + ',0,0)';
                 context.fillText(this.bombs, this.x * this.size + this.size / 3, this.y * this.size + this.size / 1.4);
-                context.strokeText(this.bombs, this.x * this.size + this.size / 3, this.y * this.size + this.size / 1.4);
+                // context.strokeText(this.bombs, this.x * this.size + this.size / 3, this.y * this.size + this.size / 1.4);
             }
         } else {
             context.strokeStyle = "#444444";
@@ -203,6 +216,7 @@ function Box(x, y, size, context) {
             this.clearNeighbours();
         } else {
             this.flagged = !this.flagged;
+            this.wrong = this.flagged && !this.hasBomb;
             this.draw();
         }
     }
