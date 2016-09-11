@@ -151,7 +151,6 @@ function Grid(w, h, size, context) {
 };
 
 function Box(x, y, size, context) {
-    // var context = context;
     this.neighbours = [];
     this.x = x;
     this.y = y;
@@ -177,7 +176,6 @@ function Box(x, y, size, context) {
             if (!this.hasBomb && this.bombs) {
                 context.fillStyle = 'rgb(' + Math.floor(255-42.5*this.bombs) + ',0,0)';
                 context.fillText(this.bombs, this.x * this.size + this.size / 3, this.y * this.size + this.size / 1.4);
-                // context.strokeText(this.bombs, this.x * this.size + this.size / 3, this.y * this.size + this.size / 1.4);
             }
         } else {
             context.strokeStyle = "#444444";
