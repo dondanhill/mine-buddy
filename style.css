@@ -7,8 +7,27 @@ html, body {
     max-width: 960px;
 }
 canvas {
+    margin: 0 auto;
     display: block;
+    border: 2px solid #333;
 }
-p {
-    padding: 10px 0 0 10px;
+
+input {
+    padding: 4px;
+    width: 50px;
+}
+.details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.flex {
+    flex: 1 0 auto;
+    text-align: center;
+}
+
+#new-game {
+    padding: 10px;
 }

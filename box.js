@@ -6,66 +6,58 @@ function Box(x, y, size, context) {
     this.hasBomb = false;
     this.bombs = 0;
     this.clicked = false;
-    this.highlighted = false;
     this.flagged = false;
 
     this.draw = function() {
         context.beginPath();
-        context.rect(this.x * this.size, this.y * this.size, this.size, this.size);
+        context.clearRect(this.x * this.size, this.y * this.size, this.size, this.size);
         if (this.clicked) {
+            this.fillBox("#FFFFFF");
             if (this.hasBomb) {
-                context.fillStyle = "#FF5555";
-            } else {
-                context.fillStyle = "#FFFFFF";
+                this.fillBox('#FF8888')
+                this.drawBomb();
             }
-            context.font = '18px "Droid Sans Mono"';
-            context.textAlign = 'left';
-            context.fill();
             if (!this.hasBomb && this.bombs) {
-                context.fillStyle = 'rgb(' + Math.floor(255-42.5*this.bombs) + ',0,0)';
-                context.fillText(this.bombs, this.x * this.size + this.size / 3, this.y * this.size + this.size / 1.4);
+                context.font = "18px sans-serif";
+                context.textAlign = "center";
+                context.textBaseline = "middle";
+                context.fillStyle = "#333333";
+                context.fillText(this.bombs, this.x * this.size + this.size / 2, this.y * this.size + this.size / 2);
             }
         } else {
-            context.strokeStyle = "#444444";
-            if(this.highlighted) {
-                context.fillStyle = "#DDDDFF";
-            } 
-            else if(this.flagged) {
-                context.fillStyle = "#55FF55";
+            if(this.flagged) {
+                this.fillBox('#88FF88');
+                this.drawFlag();
+            } else {
+                this.fillBox('#8888FF');
             }
-            else {
-                context.fillStyle = "#5555FF";
-            }
-            context.fill();
         }
-        context.stroke();
-    }
+        
+    };
 
     this.setClicked = function() {
-        if (!this.clicked) {
-            if(!this.flagged) {
-                this.clicked = true;
-                if (!this.bombs) {
-                    this.neighbours.forEach(function(neighbour) {
-                        neighbour.setClicked();
-                    });
-                }
-                this.draw();
+        console.log(this)
+        if (!this.clicked && !this.flagged) {
+            this.clicked = true;
+            if (!this.bombs) {
+                this.neighbours.forEach(function(neighbour) {
+                    neighbour.setClicked();
+                });
             }
+            this.draw();
         } else {
             this.clearNeighbours();
         }
-    }
+    };
 
     this.rightClicked = function() {
         if (this.clicked) {
             this.clearNeighbours();
         } else {
             this.flagged = !this.flagged;
-            this.wrong = this.flagged && !this.hasBomb;
             this.draw();
         }
-    }
+    };
 
     this.clearNeighbours = function() {
         let flags = this.neighbours.filter(function(neighbour) {
@@ -78,5 +70,32 @@ function Box(x, y, size, context) {
                 }
             });
         }
+    };
+
+    this.drawFlag = function() {
+        context.beginPath();
+        context.moveTo(this.x * this.size + this.size * 0.3, this.y * this.size + this.size * 0.75);
+        context.lineTo(this.x * this.size + this.size * 0.3, this.y * this.size + this.size * 0.25);
+        context.lineTo(this.x * this.size + this.size * 0.7, this.y * this.size + this.size * 0.4);
+        context.lineTo(this.x * this.size + this.size * 0.3, this.y * this.size + this.size * 0.6);
+        context.stroke();
+    };
+
+    this.drawBomb = function() {
+        context.beginPath();
+        context.fillStyle = '#333333';
+        context.moveTo(this.x * this.size + this.size * 0.5, this.y * this.size + this.size * 0.5);
+        context.arc(
+            this.x * this.size + this.size * 0.5, 
+            this.y * this.size + this.size * 0.5, 
+            this.size * 0.16, 0, 2 * Math.PI);
+        context.fill();        
+    }
+
+    this.fillBox = style => {
+        context.beginPath();
+        context.fillStyle = style;
+        context.fillRect(this.x * this.size, this.y * this.size, this.size, this.size);
+        context.strokeRect(this.x * this.size, this.y * this.size, this.size, this.size);
     }
 };

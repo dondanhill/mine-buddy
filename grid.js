@@ -1,15 +1,15 @@
-function Grid(w, h, size, context) {
+function Grid(cols, rows, width, context) {
     this.boxes = [];
     this.bombs = [];
     this.flags = 0;
-    this.w = w;
-    this.h = h;
-    this.size = size;
+    this.cols = cols;
+    this.rows = rows;
+    this.size = Math.min(Math.max(width, context.canvas.width) / cols, 50);
     // generate boxes
-    for (let j = 0; j < h; j += 1) {
-        for (let i = 0; i < w; i += 1) {
-            let box = new Box(i, j, size, context);
-            if (Math.random() * 100 > 87) {
+    for (let j = 0; j < rows; j += 1) {
+        for (let i = 0; i < cols; i += 1) {
+            let box = new Box(i, j, this.size, context);
+            if (Math.random() * 17 > 14) {
                 box.hasBomb = true;
                 this.bombs.push(box);
             }
@@ -21,22 +21,28 @@ function Grid(w, h, size, context) {
         let cnt = 0;
         let box = this.boxes[i];
         if (!box.hasBomb) {
-            let neighbours = [
+            let neighboursIndices = [
                 i - 1,        // left
                 i + 1,        // right 
-                i - w - 1,    // above left
-                i - w,        // above
-                i - w + 1,    // above right
-                i + w - 1,    // below left
-                i + w,        // below
-                i + w + 1     // below right
+                i - cols - 1, // above left
+                i - cols,     // above
+                i - cols + 1, // above right
+                i + cols - 1, // below left
+                i + cols,     // below
+                i + cols + 1  // below right
             ];
-            neighbours.forEach(function (x) {
-                if (x >= 0 && x < w * h && Math.abs(box.x % w - x % w) <= 1) {
-                    if (this.boxes[x].hasBomb) {
+            neighboursIndices.forEach(function(index) {
+                let validIndex = 
+                    index >= 0 && 
+                    index < this.boxes.length && 
+                    Math.abs(box.x % cols - index % cols) <= 1; // <= left and right edge cases
+                // console.log(box);
+                // console.log(`index: ${index}, box.x: ${box.x}, box.y: ${box.y}, res: ${Math.abs(box.x % cols - index % cols)}`);
+                if (validIndex) {
+                    if (this.boxes[index].hasBomb) {
                         box.bombs += 1;
                     }
-                    box.neighbours.push(this.boxes[x]);
+                    box.neighbours.push(this.boxes[index]);
                 }
             }, this);
         }
@@ -44,6 +50,10 @@ function Grid(w, h, size, context) {
 
     this.draw = function() {
         this.flags = 0;
+        context.beginPath();
+        context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+        context.canvas.width = this.cols * this.size + 1;
+        context.canvas.height = this.rows * this.size + 1;
         this.boxes.forEach(function(box) {
             box.draw();
         });
@@ -53,23 +63,23 @@ function Grid(w, h, size, context) {
         this.getBox(x, y).setClicked();
         this.update();
     }
+
     this.rightClicked = function(x, y) {
-        let box = this.getBox(x, y);
-        box.rightClicked();
+        this.getBox(x, y).rightClicked();
         this.update();
     }
 
     this.update = function() {
         let uncovered = 0;
         let flags = 0;
-        let bombs = 0;
+        let gameOver = false;
         this.boxes.forEach(function(box) {
             uncovered += (box.clicked) ? 1 : 0;
             flags += (box.flagged) ? 1 : 0;
-            bombs += (box.hasBomb && box.clicked);
+            gameOver = (box.hasBomb && box.clicked) || gameOver;
         });
         this.flags = flags;
-        if (bombs) {
+        if (gameOver) {
             this.finished = true;
             this.bombs.forEach(function(bomb) {
                 bomb.setClicked();
@@ -81,8 +91,12 @@ function Grid(w, h, size, context) {
     }
 
     this.getBox = function(x, y) {
-        x = Math.floor(x / size);
-        y = Math.floor(y / size);
-        return this.boxes[x + y * w];
+        x = Math.floor(x / this.size);
+        y = Math.floor(y / this.size);
+        return this.boxes[x + y * cols];
+    }
+
+    this.getBombsToGo = function() {
+        return this.bombs.length - this.flags;
     }
 };

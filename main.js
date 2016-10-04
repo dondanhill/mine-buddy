@@ -2,43 +2,57 @@
 // TODO user parameter entries
 // TODO styling 
 
-var startTime;
-var timeOutId;
-var started = false;
-var grid;
+let startTime;
+let timeOutId;
+let started = false;
+let grid;
+let columns = defaultColumns = 20;
+let rows = defaultRows = 12;
+let maxWidth;
 
 window.onload = function () {
-    var canvas = document.getElementById('canvas'),
-        newGame = document.getElementById('new-game');
+    let canvas = document.getElementById('canvas'),
+        newGame = document.getElementById('new-game'),
         context = canvas.getContext('2d'),
-        width = 0,
-        height = 0;
-    
-    canvas.addEventListener('mousedown', function (event) {
+        // width = canvas.width = Math.min(maxWidth, window.innerWidth),
+        // height = canvas.height = width * defaultRows / defaultColumns,
+        bombsToGo = document.getElementById('total'),
+        timer = document.getElementById('time'),
+        colInput = document.getElementById('cols'),
+        rowInput = document.getElementById('rows');
+
+    colInput.value = columns;
+    rowInput.value = rows;
+    maxWidth = Math.min(960, window.innerWidth * 0.9);
+
+    canvas.addEventListener('mousedown', function(event) {
+        let now = new Date().valueOf();
+        console.log(now);
         if (!started) {
             startTime = new Date().valueOf();
             timeOutId = setInterval(function() {
-                var d = new Date().valueOf();
-                document.getElementById('time').innerHTML = Math.floor((d - startTime) / 1000);
+                let d = new Date().valueOf();
+                timer.innerHTML = Math.floor((d - startTime) / 1000);
                 console.log(d);
             }, 1000); 
             started = true;
         }
         if (!grid.finished) {
+            let x = event.offsetX;
+            let y = event.offsetY;
             if (event.button === 0) {
-                grid.clicked(event.clientX, event.clientY);
+                grid.clicked(x, y);
             } else {
-                grid.rightClicked(event.clientX, event.clientY);
+                grid.rightClicked(x, y);
             } 
             if (grid.finished) {
-                var d = new Date().valueOf();
                 clearTimeout(timeOutId);
-                document.getElementById('time').innerHTML = (d - startTime) / 1000;
+                timer.innerHTML = (now - startTime) / 1000;
             }    
         }
-        document.getElementById('bombs').innerHTML = grid.flags;
-        document.getElementById('total').innerHTML = grid.bombs.length; 
+        setBombsToGo();  
     });
+
     canvas.addEventListener('contextmenu', function(event) {
         event.preventDefault();
         return false;
@@ -47,16 +61,22 @@ window.onload = function () {
     newGame.addEventListener('click', function() {
         event.preventDefault();
         started = false;
-        document.getElementById('time').innerHTML = 0;
+        timer.innerHTML = 0;
         start();
-    })
+    });
 
     start();
-    // begin
+
     function start() {
-        grid = new Grid(9, 9, 35, context);
-        width = canvas.width = grid.w * grid.size;
-        height = canvas.height = grid.h * grid.size;
+        clearTimeout(timeOutId);
+        let cols = parseInt(colInput.value);
+        let rows = parseInt(rowInput.value);
+        grid = new Grid(cols, rows, maxWidth, context);
         grid.draw();
-    }
+        setBombsToGo();
+    };
+
+    function setBombsToGo() {
+        bombsToGo.innerHTML = grid.finished ? 'finished' : grid.getBombsToGo();
+    };
 };
