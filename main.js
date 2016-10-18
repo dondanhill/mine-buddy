@@ -1,5 +1,4 @@
 // TODO guaranteed first click empty
-// TODO user parameter entries
 // TODO styling 
 
 let startTime;
