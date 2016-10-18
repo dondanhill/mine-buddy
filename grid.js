@@ -17,9 +17,7 @@ function Grid(cols, rows, width, context) {
         };
     };
     // setup boxes
-    for (let i = 0; i < this.boxes.length; i += 1) {
-        let cnt = 0;
-        let box = this.boxes[i];
+    this.boxes.forEach((box, i) => {
         if (!box.hasBomb) {
             let neighboursIndices = [
                 i - 1,        // left
@@ -31,49 +29,46 @@ function Grid(cols, rows, width, context) {
                 i + cols,     // below
                 i + cols + 1  // below right
             ];
-            neighboursIndices.forEach(function(index) {
+            neighboursIndices.forEach(index => {
                 let validIndex = 
                     index >= 0 && 
                     index < this.boxes.length && 
                     Math.abs(box.x % cols - index % cols) <= 1; // <= left and right edge cases
-                // console.log(box);
-                // console.log(`index: ${index}, box.x: ${box.x}, box.y: ${box.y}, res: ${Math.abs(box.x % cols - index % cols)}`);
+
                 if (validIndex) {
                     if (this.boxes[index].hasBomb) {
                         box.bombs += 1;
                     }
                     box.neighbours.push(this.boxes[index]);
                 }
-            }, this);
+            });
         }
-    };
+    });
 
-    this.draw = function() {
+    this.draw = () => {
         this.flags = 0;
         context.beginPath();
         context.clearRect(0, 0, context.canvas.width, context.canvas.height);
         context.canvas.width = this.cols * this.size + 1;
         context.canvas.height = this.rows * this.size + 1;
-        this.boxes.forEach(function(box) {
-            box.draw();
-        });
+        this.boxes.forEach(box => box.draw());
     }
 
-    this.clicked = function(x, y) {
+    this.clicked = (x, y) => {
         this.getBox(x, y).setClicked();
         this.update();
     }
 
-    this.rightClicked = function(x, y) {
+    this.rightClicked = (x, y) => {
         this.getBox(x, y).rightClicked();
         this.update();
     }
 
-    this.update = function() {
+    this.update = () => {
         let uncovered = 0;
         let flags = 0;
         let gameOver = false;
-        this.boxes.forEach(function(box) {
+        this.boxes.forEach(box => {
             uncovered += (box.clicked) ? 1 : 0;
             flags += (box.flagged) ? 1 : 0;
             gameOver = (box.hasBomb && box.clicked) || gameOver;
@@ -81,22 +76,20 @@ function Grid(cols, rows, width, context) {
         this.flags = flags;
         if (gameOver) {
             this.finished = true;
-            this.bombs.forEach(function(bomb) {
-                bomb.setClicked();
-            })
+            this.bombs.forEach(bomb => bomb.setClicked());
         }
         if (this.boxes.length === uncovered + this.bombs.length) {
             this.finished = true;
         } 
     }
 
-    this.getBox = function(x, y) {
+    this.getBox = (x, y) => {
         x = Math.floor(x / this.size);
         y = Math.floor(y / this.size);
         return this.boxes[x + y * cols];
     }
 
-    this.getBombsToGo = function() {
+    this.getBombsToGo = () => {
         return this.bombs.length - this.flags;
     }
 };

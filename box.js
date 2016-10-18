@@ -8,7 +8,7 @@ function Box(x, y, size, context) {
     this.clicked = false;
     this.flagged = false;
 
-    this.draw = function() {
+    this.draw = () => {
         context.beginPath();
         context.clearRect(this.x * this.size, this.y * this.size, this.size, this.size);
         if (this.clicked) {
@@ -35,14 +35,11 @@ function Box(x, y, size, context) {
         
     };
 
-    this.setClicked = function() {
-        console.log(this)
+    this.setClicked = () => {
         if (!this.clicked && !this.flagged) {
             this.clicked = true;
             if (!this.bombs) {
-                this.neighbours.forEach(function(neighbour) {
-                    neighbour.setClicked();
-                });
+                this.neighbours.forEach(neighbour => neighbour.setClicked());
             }
             this.draw();
         } else {
@@ -50,7 +47,7 @@ function Box(x, y, size, context) {
         }
     };
 
-    this.rightClicked = function() {
+    this.rightClicked = () => {
         if (this.clicked) {
             this.clearNeighbours();
         } else {
@@ -59,12 +56,10 @@ function Box(x, y, size, context) {
         }
     };
 
-    this.clearNeighbours = function() {
-        let flags = this.neighbours.filter(function(neighbour) {
-            return neighbour.flagged;
-        });
+    this.clearNeighbours = () => {
+        let flags = this.neighbours.filter(neighbour => neighbour.flagged);
         if (flags.length && flags.length === this.bombs) {
-            this.neighbours.forEach(function(neighbour) {
+            this.neighbours.forEach(neighbour => {
                 if(!neighbour.clicked && !neighbour.flagged) {
                     neighbour.setClicked();
                 }
@@ -72,7 +67,7 @@ function Box(x, y, size, context) {
         }
     };
 
-    this.drawFlag = function() {
+    this.drawFlag = () => {
         context.beginPath();
         context.moveTo(this.x * this.size + this.size * 0.3, this.y * this.size + this.size * 0.75);
         context.lineTo(this.x * this.size + this.size * 0.3, this.y * this.size + this.size * 0.25);
@@ -81,10 +76,9 @@ function Box(x, y, size, context) {
         context.stroke();
     };
 
-    this.drawBomb = function() {
+    this.drawBomb = () => {
         context.beginPath();
         context.fillStyle = '#333333';
-        context.moveTo(this.x * this.size + this.size * 0.5, this.y * this.size + this.size * 0.5);
         context.arc(
             this.x * this.size + this.size * 0.5, 
             this.y * this.size + this.size * 0.5, 

@@ -10,12 +10,10 @@ let columns = defaultColumns = 20;
 let rows = defaultRows = 12;
 let maxWidth;
 
-window.onload = function () {
+window.onload = () => {
     let canvas = document.getElementById('canvas'),
         newGame = document.getElementById('new-game'),
         context = canvas.getContext('2d'),
-        // width = canvas.width = Math.min(maxWidth, window.innerWidth),
-        // height = canvas.height = width * defaultRows / defaultColumns,
         bombsToGo = document.getElementById('total'),
         timer = document.getElementById('time'),
         colInput = document.getElementById('cols'),
@@ -25,15 +23,13 @@ window.onload = function () {
     rowInput.value = rows;
     maxWidth = Math.min(960, window.innerWidth * 0.9);
 
-    canvas.addEventListener('mousedown', function(event) {
+    canvas.addEventListener('mousedown', event => {
         let now = new Date().valueOf();
-        console.log(now);
         if (!started) {
             startTime = new Date().valueOf();
-            timeOutId = setInterval(function() {
+            timeOutId = setInterval(() => {
                 let d = new Date().valueOf();
                 timer.innerHTML = Math.floor((d - startTime) / 1000);
-                console.log(d);
             }, 1000); 
             started = true;
         }
@@ -53,12 +49,12 @@ window.onload = function () {
         setBombsToGo();  
     });
 
-    canvas.addEventListener('contextmenu', function(event) {
+    canvas.addEventListener('contextmenu', event => {
         event.preventDefault();
         return false;
     });
 
-    newGame.addEventListener('click', function() {
+    newGame.addEventListener('click', () => {
         event.preventDefault();
         started = false;
         timer.innerHTML = 0;
@@ -77,6 +73,6 @@ window.onload = function () {
     };
 
     function setBombsToGo() {
-        bombsToGo.innerHTML = grid.finished ? 'finished' : grid.getBombsToGo();
+        bombsToGo.innerHTML = grid.finished ? `finished (${grid.bombs.length})` : grid.getBombsToGo();
     };
 };
