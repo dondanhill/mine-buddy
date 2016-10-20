@@ -7,4 +7,4 @@ be warned, you may get sidetracked.
 
 please feel free to submit issues/prs
 
-or simply play it [https://dondanhill.github.io/mine-buddy-canvas/](here)
+or simply play it [here](https://dondanhill.github.io/mine-buddy-canvas/)
