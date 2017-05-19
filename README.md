@@ -1,7 +1,7 @@
 # mine-buddy
-minesweeper clone written in html canvas and js
+minesweeper clone written in html, canvas and js
 
-programming exercise for fun.
+programming exercise for fun. inspired by Dan Shiffman of [Coding Train](https://github.com/CodingTrain/Rainbow-Code)
 
 be warned, you may get sidetracked.
 
